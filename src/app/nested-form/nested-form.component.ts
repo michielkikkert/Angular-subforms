@@ -1,9 +1,24 @@
-import { Component, forwardRef, Optional } from '@angular/core';
-import { ControlContainer, ControlValueAccessor, FormGroup, FormGroupDirective, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, forwardRef, OnInit, OnDestroy, Self, Input } from '@angular/core';
+import {
+    AbstractControl,
+    ControlContainer,
+    ControlValueAccessor,
+    FormControl,
+    FormGroup,
+    FormGroupDirective,
+    NG_VALUE_ACCESSOR,
+    NgControl, ValidationErrors, Validator, Validators
+} from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-nested-form',
-    templateUrl: './nested-form.component.html',
+    template: `
+        <form [formGroup]="form">
+            <input type="text" class="form-control" formControlName="nested1">
+            <input type="text" class="form-control" formControlName="nested2">
+        </form>
+    `,
     styleUrls: ['./nested-form.component.scss'],
     providers: [
         {
@@ -14,21 +29,46 @@ import { ControlContainer, ControlValueAccessor, FormGroup, FormGroupDirective, 
     ],
     viewProviders: [ { provide: ControlContainer, useExisting: FormGroupDirective } ]
 })
-export class NestedFormComponent implements ControlValueAccessor {
+export class NestedFormComponent implements OnInit, OnDestroy, ControlValueAccessor, Validator {
 
     private onChange: any = (_: any) => {};
     private onTouched: any = () => {};
-    public inputvalue: string;
-    public isDisabled: boolean;
+    @Input() formControlName: string;
+    parentForm: FormGroup;
+    parentControl: AbstractControl;
+    formSub: Subscription;
+    form: FormGroup = new FormGroup({
+        nested1: new FormControl(null, [Validators.required]),
+        nested2: new FormControl(null, [Validators.required]),
+    }, [Validators.required]);
 
     constructor(
-        private ctrlContainer: FormGroupDirective
-    ) {
-        console.log(this.ctrlContainer);
+        private parentFormContainer: FormGroupDirective
+    ) {}
+
+    ngOnInit(): void {
+
+        if (this.parentFormContainer) {
+            this.parentForm = this.parentFormContainer.form;
+        }
+
+        this.parentControl = this.parentForm.get(this.formControlName);
+        this.form.setValidators([this.parentControl.validator]);
+
+        console.log('CONTROL', this.parentControl);
+
+        this.formSub = this.form.valueChanges.subscribe(
+            values => {
+                this.onChange(values);
+                console.log('NESTED VALID', this.form.valid);
+            }
+        );
+
     }
 
     writeValue(val: any): void {
-
+        console.log('writeValue', val);
+        this.form.patchValue(val, {emitEvent: false});
     }
 
     registerOnChange(fn: any): void{
@@ -40,11 +80,16 @@ export class NestedFormComponent implements ControlValueAccessor {
     }
 
     setDisabledState(isDisabled: boolean): void {
-        this.isDisabled = isDisabled;
+        isDisabled ? this.form.disable() : this.form.enable();
+
     }
 
-    inputChanged(value) {
-        this.onChange(value);
+    validate(c: AbstractControl): ValidationErrors | null {
+        return this.form.valid ? null : {nestedForm: {valid: false, message: 'All nested inputs are required'}};
+    }
+
+    ngOnDestroy(): void {
+        this.formSub && this.formSub.unsubscribe();
     }
 
 }

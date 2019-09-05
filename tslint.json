@@ -2,6 +2,7 @@
   "extends": "tslint:recommended",
   "rules": {
     "no-trailing-whitespace": false,
+    "no-unused-expression": false,
     "array-type": false,
     "arrow-parens": false,
     "deprecation": {

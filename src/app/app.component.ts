@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
     selector: 'app-root',
@@ -12,8 +12,9 @@ export class AppComponent {
     form: FormGroup = new FormGroup({
         test1: new FormControl(),
         test2: new FormControl(),
-        nested: new FormControl()
+        nested: new FormControl({
+            nested1: 'Test value nested 1',
+            nested2: 'test value nested 2'
+        }, [Validators.required])
     });
-
-
 }
