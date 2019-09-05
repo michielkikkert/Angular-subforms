@@ -5,19 +5,19 @@ import {
     ControlValueAccessor,
     FormControl,
     FormGroup,
-    FormGroupDirective,
+    FormGroupDirective, NG_VALIDATORS,
     NG_VALUE_ACCESSOR,
-    NgControl, ValidationErrors, Validator, Validators
+    NgControl, RequiredValidator, ValidationErrors, Validator, Validators
 } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-nested-form',
     template: `
-        <form [formGroup]="form">
+        <ng-container [formGroup]="form">
             <input type="text" class="form-control" formControlName="nested1">
             <input type="text" class="form-control" formControlName="nested2">
-        </form>
+        </ng-container>
     `,
     styleUrls: ['./nested-form.component.scss'],
     providers: [
@@ -25,7 +25,11 @@ import { Subscription } from 'rxjs';
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => NestedFormComponent),
             multi: true,
-        }
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => NestedFormComponent),
+            multi: true }
     ],
     viewProviders: [ { provide: ControlContainer, useExisting: FormGroupDirective } ]
 })
@@ -40,7 +44,7 @@ export class NestedFormComponent implements OnInit, OnDestroy, ControlValueAcces
     form: FormGroup = new FormGroup({
         nested1: new FormControl(null, [Validators.required]),
         nested2: new FormControl(null, [Validators.required]),
-    }, [Validators.required]);
+    });
 
     constructor(
         private parentFormContainer: FormGroupDirective
@@ -53,7 +57,7 @@ export class NestedFormComponent implements OnInit, OnDestroy, ControlValueAcces
         }
 
         this.parentControl = this.parentForm.get(this.formControlName);
-        this.form.setValidators([this.parentControl.validator]);
+        // this.form.setValidators([this.parentControl.validator]);
 
         console.log('CONTROL', this.parentControl);
 
