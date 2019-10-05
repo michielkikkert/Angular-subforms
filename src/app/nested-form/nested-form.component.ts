@@ -7,7 +7,7 @@ import {
     FormGroup,
     FormGroupDirective, NG_VALIDATORS,
     NG_VALUE_ACCESSOR,
-    NgControl, RequiredValidator, ValidationErrors, Validator, Validators
+    ValidationErrors, Validator, Validators
 } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
