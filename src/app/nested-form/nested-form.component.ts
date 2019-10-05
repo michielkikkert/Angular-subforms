@@ -31,6 +31,7 @@ import { Subscription } from 'rxjs';
             useExisting: forwardRef(() => NestedFormComponent),
             multi: true }
     ],
+
     viewProviders: [ { provide: ControlContainer, useExisting: FormGroupDirective } ]
 })
 export class NestedFormComponent implements OnInit, OnDestroy, ControlValueAccessor, Validator {
